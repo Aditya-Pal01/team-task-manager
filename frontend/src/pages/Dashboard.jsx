@@ -1,245 +1,196 @@
 import { useEffect, useState } from "react";
-import api from "../api";
-import { useNavigate } from "react-router-dom";
+import API from "../api";
+import { jwtDecode } from "jwt-decode";
 
-function Dashboard() {
+export default function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
 
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [projectName, setProjectName] = useState("");
   const [taskTitle, setTaskTitle] = useState("");
-  const [assignedTo, setAssignedTo] = useState("");
+  const [selectedUser, setSelectedUser] = useState("");
   const [dueDate, setDueDate] = useState("");
 
-  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const user = jwtDecode(token);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
-  };
-
+  // ================= FETCH =================
   const fetchProjects = async () => {
-    const res = await api.get("/projects");
+    const res = await API.get("/projects");
     setProjects(res.data);
   };
 
+  const fetchTasks = async () => {
+    const res = await API.get("/tasks");
+    setTasks(res.data);
+  };
+
   const fetchUsers = async () => {
-    const res = await api.get("/tasks/users");
+    const res = await API.get("/auth/users");
     setUsers(res.data);
   };
 
-  const fetchTasks = async (id) => {
-    setSelectedProject(id);
-    const res = await api.get(`/tasks/${id}`);
-    setTasks(res.data);
+  useEffect(() => {
+    fetchProjects();
+    fetchTasks();
+    fetchUsers();
+  }, []);
+
+  // ================= CREATE =================
+  const createProject = async () => {
+    if (!projectName) return alert("Enter project name");
+
+    await API.post("/projects", { name: projectName });
+    setProjectName("");
+    fetchProjects();
   };
 
   const createTask = async () => {
     if (!taskTitle) return alert("Enter task");
 
-    await api.post("/tasks", {
+    await API.post("/tasks", {
       title: taskTitle,
-      projectId: selectedProject,
-      assignedTo,
+      assignedTo: selectedUser,
       dueDate,
     });
 
     setTaskTitle("");
-    setAssignedTo("");
-    setDueDate("");
-    fetchTasks(selectedProject);
+    fetchTasks();
   };
 
-  const updateTask = async (id, status) => {
-    await api.put(`/tasks/${id}`, { status });
-    fetchTasks(selectedProject);
+  // ================= LOGIC =================
+  const isOverdue = (date, status) => {
+    return new Date(date) < new Date() && status !== "done";
   };
 
-  useEffect(() => {
-    fetchProjects();
-    fetchUsers();
-  }, []);
-
+  // ================= UI =================
   return (
     <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>🚀 Dashboard</h1>
+      <h1>📊 Dashboard</h1>
 
-        <button style={styles.logout} onClick={logout}>
-          Logout
-        </button>
+      {/* CREATE PROJECT (ADMIN ONLY) */}
+      {user.role === "admin" && (
+        <div style={styles.card}>
+          <h3>Create Project</h3>
 
-        <h2>📁 Projects</h2>
+          <input
+            placeholder="Project name"
+            value={projectName}
+            onChange={(e) => setProjectName(e.target.value)}
+            style={styles.input}
+          />
 
-        <div style={styles.projectList}>
-          {projects.map((p) => (
-            <button
-              key={p._id}
-              style={styles.projectBtn}
-              onClick={() => fetchTasks(p._id)}
-            >
-              {p.title}
-            </button>
-          ))}
+          <button style={styles.button} onClick={createProject}>
+            Create Project
+          </button>
         </div>
+      )}
 
-        {selectedProject && (
-          <>
-            <h2>✅ Tasks</h2>
+      {/* TASK CREATE */}
+      <div style={styles.card}>
+        <h3>Create Task</h3>
 
-            <div style={styles.inputRow}>
-              <input
-                style={styles.input}
-                placeholder="Task title"
-                value={taskTitle}
-                onChange={(e) => setTaskTitle(e.target.value)}
-              />
+        <input
+          placeholder="Task title"
+          value={taskTitle}
+          onChange={(e) => setTaskTitle(e.target.value)}
+          style={styles.input}
+        />
 
-              <select
-                style={styles.input}
-                value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value)}
-              >
-                <option value="">Assign</option>
-                {users.map((u) => (
-                  <option key={u._id} value={u._id}>
-                    {u.name}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                style={styles.input}
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
-
-              <button style={styles.addBtn} onClick={createTask}>
-                Add
-              </button>
-            </div>
-
-            {tasks.map((t) => {
-              const isOverdue =
-                t.dueDate && new Date(t.dueDate) < new Date();
-
-              return (
-                <div key={t._id} style={styles.taskCard}>
-                  <div>
-                    <strong>{t.title}</strong>
-                    <p>👤 {t.assignedTo?.name || "Unassigned"}</p>
-                    <p>📅 {t.dueDate?.slice(0, 10)}</p>
-                    {isOverdue && (
-                      <span style={styles.overdue}>Overdue</span>
-                    )}
-                  </div>
-
-                  <div>
-                    <button onClick={() => updateTask(t._id, "todo")}>
-                      Todo
-                    </button>
-                    <button
-                      onClick={() =>
-                        updateTask(t._id, "in-progress")
-                      }
-                    >
-                      Progress
-                    </button>
-                    <button onClick={() => updateTask(t._id, "done")}>
-                      Done
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </>
+        {user.role === "admin" && (
+          <select
+            value={selectedUser}
+            onChange={(e) => setSelectedUser(e.target.value)}
+            style={styles.input}
+          >
+            <option value="">Assign User</option>
+            {users.map((u) => (
+              <option key={u._id} value={u._id}>
+                {u.email} ({u.role})
+              </option>
+            ))}
+          </select>
         )}
+
+        <input
+          type="date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          style={styles.input}
+        />
+
+        <button style={styles.button} onClick={createTask}>
+          Add Task
+        </button>
+      </div>
+
+      {/* PROJECTS */}
+      <div style={styles.card}>
+        <h2>Projects</h2>
+        {projects.map((p) => (
+          <div key={p._id} style={styles.project}>
+            {p.name}
+          </div>
+        ))}
+      </div>
+
+      {/* TASKS */}
+      <div style={styles.card}>
+        <h2>Tasks</h2>
+
+        {tasks.map((t) => (
+          <div
+            key={t._id}
+            style={{
+              background: isOverdue(t.dueDate, t.status)
+                ? "#ef4444"
+                : "#334155",
+              padding: "10px",
+              margin: "10px 0",
+              borderRadius: "6px",
+            }}
+          >
+            {t.title} - {t.status}
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-export default Dashboard;
-
-// 🎨 STYLES
+// ================= STYLES =================
 const styles = {
   container: {
+    padding: "20px",
     background: "#0f172a",
     minHeight: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "white",
+    color: "#fff",
   },
-
   card: {
     background: "#1e293b",
-    padding: "30px",
-    borderRadius: "15px",
-    width: "600px",
-    boxShadow: "0 0 20px rgba(0,0,0,0.5)",
+    padding: "20px",
+    margin: "20px 0",
+    borderRadius: "10px",
   },
-
-  title: {
-    textAlign: "center",
-  },
-
-  logout: {
-    float: "right",
-    background: "#ef4444",
-    border: "none",
-    padding: "6px 12px",
-    color: "white",
-    borderRadius: "5px",
-  },
-
-  projectList: {
-    display: "flex",
-    gap: "10px",
-    flexWrap: "wrap",
-  },
-
-  projectBtn: {
-    background: "#3b82f6",
-    color: "white",
-    padding: "8px 12px",
-    border: "none",
-    borderRadius: "6px",
-  },
-
-  inputRow: {
-    display: "flex",
-    gap: "10px",
-    marginBottom: "15px",
-  },
-
   input: {
-    padding: "8px",
-    borderRadius: "5px",
+    padding: "10px",
+    margin: "10px",
+    borderRadius: "6px",
     border: "none",
   },
-
-  addBtn: {
+  button: {
+    padding: "10px",
     background: "#22c55e",
-    color: "white",
     border: "none",
-    padding: "8px 12px",
-    borderRadius: "5px",
+    color: "#fff",
+    borderRadius: "6px",
+    cursor: "pointer",
   },
-
-  taskCard: {
+  project: {
     background: "#334155",
     padding: "10px",
-    borderRadius: "8px",
-    marginBottom: "10px",
-    display: "flex",
-    justifyContent: "space-between",
-  },
-
-  overdue: {
-    color: "red",
-    fontWeight: "bold",
+    margin: "10px 0",
+    borderRadius: "6px",
   },
 };
