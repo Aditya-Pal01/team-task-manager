@@ -24,16 +24,16 @@ export default function Login() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2>🚀 Login</h2>
+        <h1 style={styles.title}>🚀 Login</h1>
 
         <input
-          placeholder="Email"
+          placeholder="Enter Email"
           style={styles.input}
           onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
-          placeholder="Password"
+          placeholder="Enter Password"
           type="password"
           style={styles.input}
           onChange={(e) => setPassword(e.target.value)}
@@ -55,24 +55,40 @@ const styles = {
     alignItems: "center",
     background: "linear-gradient(135deg, #667eea, #764ba2)",
   },
+
   card: {
-    background: "#fff",
-    padding: "30px",
-    borderRadius: "12px",
-    width: "300px",
+    background: "rgba(255,255,255,0.95)",
+    padding: "35px",
+    borderRadius: "15px",
+    width: "320px",
     textAlign: "center",
+    boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
   },
+
+  title: {
+    color: "#1e293b",   // 👈 DARK COLOR (fix)
+    marginBottom: "20px",
+    fontWeight: "bold",
+  },
+
   input: {
     width: "100%",
-    padding: "10px",
+    padding: "12px",
     margin: "10px 0",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    fontSize: "14px",
   },
+
   button: {
     width: "100%",
-    padding: "10px",
+    padding: "12px",
     background: "#667eea",
     color: "#fff",
     border: "none",
+    borderRadius: "8px",
     cursor: "pointer",
+    fontSize: "16px",
+    marginTop: "10px",
   },
 };
