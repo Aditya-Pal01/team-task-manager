@@ -18,11 +18,12 @@ const taskSchema = new mongoose.Schema({
 
   dueDate: Date,
 
-  // 🔥 IMPORTANT (KANBAN)
+  // 🔥 FIXED VERSION
   status: {
     type: String,
     enum: ["todo", "doing", "done"],
     default: "todo",
+    required: false,
   },
 });
 
