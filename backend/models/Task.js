@@ -2,8 +2,16 @@ import mongoose from "mongoose";
 
 const taskSchema = new mongoose.Schema({
   title: String,
-  project: { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
-  assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Project"
+  },
+
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  },
 
   status: {
     type: String,

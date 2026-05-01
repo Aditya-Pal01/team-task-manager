@@ -3,34 +3,22 @@ import Project from "../models/Project.js";
 
 const router = express.Router();
 
-// ✅ CREATE PROJECT (SAFE)
+// CREATE
 router.post("/", async (req, res) => {
   try {
-    console.log("BODY:", req.body); // 🔥 debug
-
-    const { title } = req.body;
-
-    if (!title) {
-      return res.status(400).json({ msg: "Title required" });
-    }
-
-    const project = new Project({
-      title,
-    });
-
+    const project = new Project(req.body);
     await project.save();
-
     res.json(project);
   } catch (err) {
-    console.error("PROJECT ERROR:", err); // 🔥 VERY IMPORTANT
-    res.status(500).json({ msg: "Server error" });
+    console.error(err);
+    res.status(500).json({ msg: "Project error" });
   }
 });
 
-// ✅ GET PROJECTS
+// GET
 router.get("/", async (req, res) => {
-  const projects = await Project.find();
-  res.json(projects);
+  const data = await Project.find();
+  res.json(data);
 });
 
 export default router;
