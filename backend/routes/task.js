@@ -14,3 +14,4 @@ router.get("/", async (req, res) => {
     res.status(500).json("Error fetching tasks");
   }
 });
+export default router;

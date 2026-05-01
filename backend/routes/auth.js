@@ -10,21 +10,29 @@ router.post("/signup", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    const hashed = await bcrypt.hash(password, 10);
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ msg: "User already exists" });
+    }
 
-    const user = await User.create({
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
       name,
       email,
-      password: hashed,
-      role,
+      password: hashedPassword,
+      role: role || "member"
     });
 
-    res.json(user);
+    await user.save();
+
+    res.json({ msg: "User created successfully" });
+
   } catch (err) {
-    res.status(500).json({ msg: "Signup error" });
+    console.error(err); // 👈 IMPORTANT
+    res.status(500).json({ msg: "Server error" });
   }
 });
-
 // LOGIN
 router.post("/login", async (req, res) => {
   try {
