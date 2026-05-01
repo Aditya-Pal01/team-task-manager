@@ -9,7 +9,7 @@ export default function Dashboard() {
   const [newTask, setNewTask] = useState({
     title: "",
     projectId: "",
-    dueDate: ""
+    dueDate: "",
   });
 
   useEffect(() => {
@@ -20,14 +20,13 @@ export default function Dashboard() {
     const p = await API.get("/projects");
     const t = await API.get("/tasks");
 
-    setProjects(p.data);   // ✅ important
+    setProjects(p.data);
     setTasks(t.data);
   };
 
   const createProject = async () => {
     if (!newProject) return;
-
-    await API.post("/projects", { name: newProject }); // ✅ name match
+    await API.post("/projects", { name: newProject });
     setNewProject("");
     fetchData();
   };
@@ -38,81 +37,167 @@ export default function Dashboard() {
   };
 
   return (
-    <div style={{ padding: "30px" }}>
-      <h1>Dashboard</h1>
+    <div style={styles.container}>
+      <h1 style={styles.title}>🚀 Dashboard</h1>
 
-      {/* Create Project */}
-      <div>
-        <h3>Create Project</h3>
-        <input
-          placeholder="Project name"
-          value={newProject}
-          onChange={(e) => setNewProject(e.target.value)}
-        />
-        <button onClick={createProject}>Add Project</button>
+      {/* PROJECT */}
+      <div style={styles.card}>
+        <h2>Create Project</h2>
+
+        <div style={styles.row}>
+          <input
+            placeholder="Project name"
+            value={newProject}
+            onChange={(e) => setNewProject(e.target.value)}
+            style={styles.input}
+          />
+          <button onClick={createProject} style={styles.button}>
+            Add
+          </button>
+        </div>
       </div>
 
-      {/* Projects List */}
-      <div>
-        <h3>Projects</h3>
-        {projects.length === 0 ? (
-          <p>No projects</p>
-        ) : (
-          projects.map((p) => (
-            <div key={p._id}>{p.name}</div>
-          ))
-        )}
-      </div>
+      {/* PROJECT LIST */}
+      <div style={styles.card}>
+        <h2>Projects</h2>
 
-      {/* Create Task */}
-      <div>
-        <h3>Create Task</h3>
-
-        <input
-          placeholder="Task title"
-          onChange={(e) =>
-            setNewTask({ ...newTask, title: e.target.value })
-          }
-        />
-
-        <select
-          onChange={(e) =>
-            setNewTask({ ...newTask, projectId: e.target.value })
-          }
-        >
-          <option>Select Project</option>
+        <div style={styles.grid}>
           {projects.map((p) => (
-            <option key={p._id} value={p._id}>
+            <div key={p._id} style={styles.projectCard}>
               {p.name}
-            </option>
+            </div>
           ))}
-        </select>
-
-        <input
-          type="date"
-          onChange={(e) =>
-            setNewTask({ ...newTask, dueDate: e.target.value })
-          }
-        />
-
-        <button onClick={createTask}>Add Task</button>
+        </div>
       </div>
 
-      {/* Task List */}
-      <div>
-        <h3>Tasks</h3>
-        {tasks.length === 0 ? (
-          <p>No tasks</p>
-        ) : (
-          tasks.map((t) => (
-            <div key={t._id}>
-              <b>{t.title}</b>
-              <p>{t.projectId?.name}</p>
-              <p>{t.dueDate?.slice(0, 10)}</p>
-            </div>
-          ))
-        )}
+      {/* TASK */}
+      <div style={styles.card}>
+        <h2>Create Task</h2>
+
+        <div style={styles.row}>
+          <input
+            placeholder="Task title"
+            onChange={(e) =>
+              setNewTask({ ...newTask, title: e.target.value })
+            }
+            style={styles.input}
+          />
+
+          <select
+            onChange={(e) =>
+              setNewTask({ ...newTask, projectId: e.target.value })
+            }
+            style={styles.input}
+          >
+            <option>Select Project</option>
+            {projects.map((p) => (
+              <option key={p._id} value={p._id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="date"
+            onChange={(e) =>
+              setNewTask({ ...newTask, dueDate: e.target.value })
+            }
+            style={styles.input}
+          />
+
+          <button onClick={createTask} style={styles.button}>
+            Add
+          </button>
+        </div>
+      </div>
+
+      {/* TASK LIST */}
+      <div style={styles.card}>
+        <h2>Tasks</h2>
+
+        <div style={styles.grid}>
+          {tasks.map((t) => {
+            const overdue = new Date(t.dueDate) < new Date();
+
+            return (
+              <div
+                key={t._id}
+                style={{
+                  ...styles.taskCard,
+                  border: overdue ? "2px solid red" : "none",
+                }}
+              >
+                <h3>{t.title}</h3>
+                <p>{t.projectId?.name}</p>
+                <small>{t.dueDate?.slice(0, 10)}</small>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    background: "#0f172a",
+    minHeight: "100vh",
+    padding: "40px",
+    color: "white",
+    fontFamily: "sans-serif",
+  },
+
+  title: {
+    textAlign: "center",
+    marginBottom: "30px",
+  },
+
+  card: {
+    background: "#1e293b",
+    padding: "20px",
+    borderRadius: "10px",
+    marginBottom: "20px",
+  },
+
+  row: {
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap",
+  },
+
+  input: {
+    padding: "10px",
+    borderRadius: "6px",
+    border: "none",
+    flex: 1,
+  },
+
+  button: {
+    background: "#6366f1",
+    color: "white",
+    border: "none",
+    padding: "10px 15px",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+    gap: "10px",
+  },
+
+  projectCard: {
+    background: "#334155",
+    padding: "10px",
+    borderRadius: "8px",
+    textAlign: "center",
+  },
+
+  taskCard: {
+    background: "#334155",
+    padding: "10px",
+    borderRadius: "8px",
+  },
+};
