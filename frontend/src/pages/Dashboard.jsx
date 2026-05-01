@@ -4,6 +4,7 @@ import API from "../api";
 export default function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [newProject, setNewProject] = useState("");
   const [newTask, setNewTask] = useState({
@@ -17,11 +18,13 @@ export default function Dashboard() {
   }, []);
 
   const fetchData = async () => {
+    setLoading(true);
     const p = await API.get("/projects");
     const t = await API.get("/tasks");
 
     setProjects(p.data);
     setTasks(t.data);
+    setLoading(false);
   };
 
   const createProject = async () => {
@@ -36,103 +39,118 @@ export default function Dashboard() {
     fetchData();
   };
 
+  if (loading) {
+    return <div style={styles.loader}>⏳ Loading...</div>;
+  }
+
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>🚀 Dashboard</h1>
-
-      {/* PROJECT */}
-      <div style={styles.card}>
-        <h2>Create Project</h2>
-
-        <div style={styles.row}>
-          <input
-            placeholder="Project name"
-            value={newProject}
-            onChange={(e) => setNewProject(e.target.value)}
-            style={styles.input}
-          />
-          <button onClick={createProject} style={styles.button}>
-            Add
-          </button>
-        </div>
+      {/* Sidebar */}
+      <div style={styles.sidebar}>
+        <h2>🚀 TM</h2>
+        <p>Dashboard</p>
+        <p>Projects</p>
+        <p>Tasks</p>
       </div>
 
-      {/* PROJECT LIST */}
-      <div style={styles.card}>
-        <h2>Projects</h2>
+      {/* Main */}
+      <div style={styles.main}>
+        <h1>Dashboard</h1>
 
-        <div style={styles.grid}>
-          {projects.map((p) => (
-            <div key={p._id} style={styles.projectCard}>
-              {p.name}
-            </div>
-          ))}
+        {/* CREATE PROJECT */}
+        <div style={styles.card}>
+          <h3>➕ Create Project</h3>
+
+          <div style={styles.row}>
+            <input
+              placeholder="Project name"
+              value={newProject}
+              onChange={(e) => setNewProject(e.target.value)}
+              style={styles.input}
+            />
+            <button onClick={createProject} style={styles.btn}>
+              Add
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* TASK */}
-      <div style={styles.card}>
-        <h2>Create Task</h2>
+        {/* PROJECT LIST */}
+        <div style={styles.card}>
+          <h3>📁 Projects</h3>
 
-        <div style={styles.row}>
-          <input
-            placeholder="Task title"
-            onChange={(e) =>
-              setNewTask({ ...newTask, title: e.target.value })
-            }
-            style={styles.input}
-          />
-
-          <select
-            onChange={(e) =>
-              setNewTask({ ...newTask, projectId: e.target.value })
-            }
-            style={styles.input}
-          >
-            <option>Select Project</option>
+          <div style={styles.grid}>
             {projects.map((p) => (
-              <option key={p._id} value={p._id}>
+              <div key={p._id} style={styles.project}>
                 {p.name}
-              </option>
-            ))}
-          </select>
-
-          <input
-            type="date"
-            onChange={(e) =>
-              setNewTask({ ...newTask, dueDate: e.target.value })
-            }
-            style={styles.input}
-          />
-
-          <button onClick={createTask} style={styles.button}>
-            Add
-          </button>
-        </div>
-      </div>
-
-      {/* TASK LIST */}
-      <div style={styles.card}>
-        <h2>Tasks</h2>
-
-        <div style={styles.grid}>
-          {tasks.map((t) => {
-            const overdue = new Date(t.dueDate) < new Date();
-
-            return (
-              <div
-                key={t._id}
-                style={{
-                  ...styles.taskCard,
-                  border: overdue ? "2px solid red" : "none",
-                }}
-              >
-                <h3>{t.title}</h3>
-                <p>{t.projectId?.name}</p>
-                <small>{t.dueDate?.slice(0, 10)}</small>
               </div>
-            );
-          })}
+            ))}
+          </div>
+        </div>
+
+        {/* CREATE TASK */}
+        <div style={styles.card}>
+          <h3>📝 Create Task</h3>
+
+          <div style={styles.row}>
+            <input
+              placeholder="Task title"
+              onChange={(e) =>
+                setNewTask({ ...newTask, title: e.target.value })
+              }
+              style={styles.input}
+            />
+
+            <select
+              onChange={(e) =>
+                setNewTask({ ...newTask, projectId: e.target.value })
+              }
+              style={styles.input}
+            >
+              <option>Select Project</option>
+              {projects.map((p) => (
+                <option key={p._id} value={p._id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="date"
+              onChange={(e) =>
+                setNewTask({ ...newTask, dueDate: e.target.value })
+              }
+              style={styles.input}
+            />
+
+            <button onClick={createTask} style={styles.btn}>
+              Add
+            </button>
+          </div>
+        </div>
+
+        {/* TASK LIST */}
+        <div style={styles.card}>
+          <h3>📌 Tasks</h3>
+
+          <div style={styles.grid}>
+            {tasks.map((t) => {
+              const overdue = new Date(t.dueDate) < new Date();
+
+              return (
+                <div
+                  key={t._id}
+                  style={{
+                    ...styles.task,
+                    border: overdue ? "2px solid red" : "none",
+                  }}
+                >
+                  <b>{t.title}</b>
+                  <p>{t.projectId?.name}</p>
+                  <small>{t.dueDate?.slice(0, 10)}</small>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
@@ -141,16 +159,22 @@ export default function Dashboard() {
 
 const styles = {
   container: {
-    background: "#0f172a",
+    display: "flex",
     minHeight: "100vh",
-    padding: "40px",
+    background: "#0f172a",
     color: "white",
     fontFamily: "sans-serif",
   },
 
-  title: {
-    textAlign: "center",
-    marginBottom: "30px",
+  sidebar: {
+    width: "200px",
+    background: "#1e293b",
+    padding: "20px",
+  },
+
+  main: {
+    flex: 1,
+    padding: "20px",
   },
 
   card: {
@@ -173,31 +197,39 @@ const styles = {
     flex: 1,
   },
 
-  button: {
+  btn: {
     background: "#6366f1",
     color: "white",
     border: "none",
-    padding: "10px 15px",
+    padding: "10px",
     borderRadius: "6px",
     cursor: "pointer",
   },
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
     gap: "10px",
   },
 
-  projectCard: {
+  project: {
     background: "#334155",
     padding: "10px",
     borderRadius: "8px",
     textAlign: "center",
   },
 
-  taskCard: {
+  task: {
     background: "#334155",
     padding: "10px",
     borderRadius: "8px",
+  },
+
+  loader: {
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: "20px",
   },
 };
