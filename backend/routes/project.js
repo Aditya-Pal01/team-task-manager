@@ -1,31 +1,30 @@
 import express from "express";
 import Project from "../models/Project.js";
-import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-// CREATE PROJECT
-router.post("/", auth, async (req, res) => {
+/* CREATE PROJECT */
+router.post("/", async (req, res) => {
   try {
-    const project = new Project({
-      title: req.body.title,
-      user: req.user.userId
-    });
+    const { title } = req.body;
+
+    const project = new Project({ title });
 
     await project.save();
     res.json(project);
   } catch (err) {
-    console.error(err);
+    console.error("PROJECT CREATE ERROR:", err);
     res.status(500).json({ msg: "Project error" });
   }
 });
 
-// GET PROJECTS
-router.get("/", auth, async (req, res) => {
+/* GET PROJECTS */
+router.get("/", async (req, res) => {
   try {
-    const projects = await Project.find({ user: req.user.userId });
+    const projects = await Project.find();
     res.json(projects);
   } catch (err) {
+    console.error("PROJECT FETCH ERROR:", err);
     res.status(500).json({ msg: "Fetch error" });
   }
 });
