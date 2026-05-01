@@ -3,36 +3,20 @@ import Task from "../models/Task.js";
 
 const router = express.Router();
 
-// GET all tasks
+// GET tasks
 router.get("/", async (req, res) => {
-  try {
-    const tasks = await Task.find()
-      .populate("assignedTo", "name")
-      .populate("project", "title");
+  const tasks = await Task.find()
+    .populate("assignedTo", "name")
+    .populate("project", "title");
 
-    res.json(tasks);
-  } catch (err) {
-    res.status(500).json({ msg: "Error fetching tasks" });
-  }
+  res.json(tasks);
 });
 
 // CREATE task
 router.post("/", async (req, res) => {
-  try {
-    const { title, project, assignedTo, dueDate } = req.body;
-
-    const task = new Task({
-      title,
-      project,
-      assignedTo,
-      dueDate
-    });
-
-    await task.save();
-    res.json(task);
-  } catch (err) {
-    res.status(500).json({ msg: "Error creating task" });
-  }
+  const task = new Task(req.body);
+  await task.save();
+  res.json(task);
 });
 
 export default router;
