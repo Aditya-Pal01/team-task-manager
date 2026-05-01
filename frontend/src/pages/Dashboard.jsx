@@ -66,7 +66,11 @@ export default function Dashboard() {
       {/* 🔥 KANBAN */}
       <div style={styles.card}>
         <h3>📌 Tasks Board</h3>
-        <KanbanBoard tasks={tasks} setTasks={setTasks} />
+         <ul>
+  {tasks.map((t) => (
+    <li key={t._id}>{t.title}</li>
+  ))}
+</ul>
       </div>
     </div>
   );
