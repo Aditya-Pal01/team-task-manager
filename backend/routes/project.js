@@ -1,28 +1,32 @@
 import express from "express";
 import Project from "../models/Project.js";
-import { auth, isAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// create project (ADMIN ONLY)
-router.post("/", auth, isAdmin, async (req, res) => {
-  const { title } = req.body;
+// CREATE PROJECT
+router.post("/", async (req, res) => {
+  try {
+    const { name } = req.body;
 
-  const project = await Project.create({
-    title,
-    createdBy: req.user.userId,
-  });
+    const project = await Project.create({
+      name,
+      createdBy: req.userId || null   // agar auth middleware hai
+    });
 
-  res.json(project);
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// get projects
-router.get("/", auth, async (req, res) => {
-  const projects = await Project.find({
-    createdBy: req.user.userId,
-  });
-
-  res.json(projects);
+// GET ALL PROJECTS
+router.get("/", async (req, res) => {
+  try {
+    const projects = await Project.find();
+    res.json(projects);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 export default router;

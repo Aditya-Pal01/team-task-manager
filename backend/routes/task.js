@@ -1,52 +1,29 @@
 import express from "express";
 import Task from "../models/Task.js";
-import User from "../models/User.js";
-import { auth } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// CREATE TASK (assign + dueDate)
-router.post("/", auth, async (req, res) => {
+// CREATE TASK
+router.post("/", async (req, res) => {
   try {
-    const { title, projectId, assignedTo, dueDate } = req.body;
-
-    const task = await Task.create({
-      title,
-      projectId,
-      assignedTo: assignedTo || req.user.userId,
-      dueDate,
-      status: "todo",
-    });
-
+    const task = await Task.create(req.body);
     res.json(task);
   } catch (err) {
-    res.status(500).json({ msg: "Task create error" });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// GET USERS (for assignment dropdown)
-router.get("/users", auth, async (req, res) => {
-  const users = await User.find();
-  res.json(users);
-});
-
 // GET TASKS
-router.get("/:projectId", auth, async (req, res) => {
-  const tasks = await Task.find({
-    projectId: req.params.projectId,
-  }).populate("assignedTo", "name email");
+router.get("/", async (req, res) => {
+  try {
+    const tasks = await Task.find()
+      .populate("assignedTo", "email")
+      .populate("projectId", "name");
 
-  res.json(tasks);
-});
-
-// UPDATE TASK
-router.put("/:id", auth, async (req, res) => {
-  const updated = await Task.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true }
-  );
-  res.json(updated);
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 export default router;
