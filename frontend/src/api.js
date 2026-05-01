@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://team-task-manager-production-f529.up.railway.app/api"
-  // ⚠️ apna backend URL yaha daalo
+  baseURL: "https://considerate-purpose-production-2082.up.railway.app/api"
 });
 
 export default API;
