@@ -1,15 +1,15 @@
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+const API = axios.create({
+  baseURL: "https://team-task-manager-production-f529.up.railway.app/api",
 });
 
-api.interceptors.request.use((config) => {
+API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
   if (token) {
-    config.headers.authorization = token;
+    req.headers.Authorization = token;
   }
-  return config;
+  return req;
 });
 
-export default api;
+export default API;
