@@ -1,12 +1,17 @@
 import express from "express";
 import Project from "../models/Project.js";
+import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-// CREATE
-router.post("/", async (req, res) => {
+// CREATE PROJECT
+router.post("/", auth, async (req, res) => {
   try {
-    const project = new Project(req.body);
+    const project = new Project({
+      title: req.body.title,
+      user: req.user.userId
+    });
+
     await project.save();
     res.json(project);
   } catch (err) {
@@ -15,10 +20,14 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET
-router.get("/", async (req, res) => {
-  const data = await Project.find();
-  res.json(data);
+// GET PROJECTS
+router.get("/", auth, async (req, res) => {
+  try {
+    const projects = await Project.find({ user: req.user.userId });
+    res.json(projects);
+  } catch (err) {
+    res.status(500).json({ msg: "Fetch error" });
+  }
 });
 
 export default router;
