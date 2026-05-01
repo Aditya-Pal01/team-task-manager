@@ -1,30 +1,17 @@
 import mongoose from "mongoose";
 
 const taskSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
+  title: String,
+  project: { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
+  assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
-  project: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Project",
-  },
-
-  assignedTo: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  },
-
-  dueDate: Date,
-
-  // 🔥 FIXED VERSION
   status: {
     type: String,
     enum: ["todo", "doing", "done"],
-    default: "todo",
-    required: false,
+    default: "todo"
   },
+
+  dueDate: Date
 });
 
 export default mongoose.model("Task", taskSchema);
