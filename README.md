@@ -7,7 +7,7 @@ A full-stack web application where users can create projects, assign tasks, and 
 ## 🌐 Live Demo
 
 Frontend: https://considerate-purpose-production-2082.up.railway.app/  
-Backend API: https://team-task-manager-production-f529.up.railway.app/api
+Backend API: https://team-task-manager-production-f529.up.railway.app/
 
 ---
 
