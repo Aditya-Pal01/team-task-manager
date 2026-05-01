@@ -1,11 +1,29 @@
 import mongoose from "mongoose";
 
 const taskSchema = new mongoose.Schema({
-  title: String,
-  projectId: { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
-  assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  title: {
+    type: String,
+    required: true,
+  },
+
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Project",
+  },
+
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+
   dueDate: Date,
-  status: { type: String, default: "pending" }
-}, { timestamps: true });
+
+  // 🔥 IMPORTANT (KANBAN)
+  status: {
+    type: String,
+    enum: ["todo", "doing", "done"],
+    default: "todo",
+  },
+});
 
 export default mongoose.model("Task", taskSchema);

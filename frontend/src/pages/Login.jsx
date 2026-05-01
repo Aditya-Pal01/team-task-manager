@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
@@ -9,37 +9,33 @@ export default function Login() {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post(
-        "https://team-task-manager-production-f529.up.railway.app/api/auth/login",
-        { email, password }
-      );
-
+      const res = await API.post("/auth/login", { email, password });
       localStorage.setItem("token", res.data.token);
       navigate("/dashboard");
-    } catch {
-      alert("Login failed");
+    } catch (err) {
+      alert("Login failed ❌");
     }
   };
 
   return (
-    <div style={styles.container}>
+    <div style={styles.bg}>
       <div style={styles.card}>
-        <h1 style={styles.title}>🚀 Login</h1>
+        <h2 style={styles.title}>🚀 Welcome Back</h2>
 
         <input
-          placeholder="Enter Email"
+          placeholder="Email"
           style={styles.input}
           onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
-          placeholder="Enter Password"
           type="password"
+          placeholder="Password"
           style={styles.input}
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button style={styles.button} onClick={handleLogin}>
+        <button onClick={handleLogin} style={styles.btn}>
           Login
         </button>
       </div>
@@ -48,47 +44,43 @@ export default function Login() {
 }
 
 const styles = {
-  container: {
+  bg: {
     height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "linear-gradient(135deg, #667eea, #764ba2)",
+    background:
+      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
   },
 
   card: {
-    background: "rgba(255,255,255,0.95)",
-    padding: "35px",
+    backdropFilter: "blur(15px)",
+    background: "rgba(255,255,255,0.1)",
+    padding: "40px",
     borderRadius: "15px",
-    width: "320px",
-    textAlign: "center",
-    boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+    width: "300px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px",
+    color: "white",
   },
 
   title: {
-    color: "#1e293b",   // 👈 DARK COLOR (fix)
-    marginBottom: "20px",
-    fontWeight: "bold",
+    textAlign: "center",
   },
 
   input: {
-    width: "100%",
-    padding: "12px",
-    margin: "10px 0",
+    padding: "10px",
     borderRadius: "8px",
-    border: "1px solid #ccc",
-    fontSize: "14px",
+    border: "none",
   },
 
-  button: {
-    width: "100%",
-    padding: "12px",
-    background: "#667eea",
-    color: "#fff",
+  btn: {
+    padding: "10px",
+    background: "#6366f1",
     border: "none",
+    color: "white",
     borderRadius: "8px",
     cursor: "pointer",
-    fontSize: "16px",
-    marginTop: "10px",
   },
 };
