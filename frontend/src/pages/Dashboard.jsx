@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../api";
-import KanbanBoard from "../components/KanbanBoard";
+/* import KanbanBoard from "../components/KanbanBoard"; */
 
 export default function Dashboard() {
   const [projects, setProjects] = useState([]);
