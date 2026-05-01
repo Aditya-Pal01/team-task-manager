@@ -3,9 +3,7 @@ import Task from "../models/Task.js";
 
 const router = express.Router();
 
-/* =========================
-   CREATE TASK
-========================= */
+/* CREATE TASK */
 router.post("/", async (req, res) => {
   try {
     const { title, project, assignedTo, dueDate } = req.body;
@@ -20,16 +18,13 @@ router.post("/", async (req, res) => {
 
     await task.save();
     res.json(task);
-
   } catch (err) {
-    console.error("TASK CREATE ERROR:", err);
+    console.error(err);
     res.status(500).json({ msg: "Task error" });
   }
 });
 
-/* =========================
-   GET TASKS
-========================= */
+/* GET TASKS */
 router.get("/", async (req, res) => {
   try {
     const tasks = await Task.find()
@@ -37,11 +32,9 @@ router.get("/", async (req, res) => {
       .populate("project", "title");
 
     res.json(tasks);
-
   } catch (err) {
-    console.error("TASK FETCH ERROR:", err);
     res.status(500).json({ msg: "Fetch error" });
   }
 });
 
-export default router;   // 🔥 YE LINE MOST IMPORTANT
+export default router;
