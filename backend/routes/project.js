@@ -3,30 +3,34 @@ import Project from "../models/Project.js";
 
 const router = express.Router();
 
-// CREATE PROJECT
+// ✅ CREATE PROJECT (SAFE)
 router.post("/", async (req, res) => {
   try {
-    const { name } = req.body;
+    console.log("BODY:", req.body); // 🔥 debug
 
-    const project = await Project.create({
-      name,
-      createdBy: req.userId || null   // agar auth middleware hai
+    const { title } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ msg: "Title required" });
+    }
+
+    const project = new Project({
+      title,
     });
+
+    await project.save();
 
     res.json(project);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("PROJECT ERROR:", err); // 🔥 VERY IMPORTANT
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
-// GET ALL PROJECTS
+// ✅ GET PROJECTS
 router.get("/", async (req, res) => {
-  try {
-    const projects = await Project.find();
-    res.json(projects);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  const projects = await Project.find();
+  res.json(projects);
 });
 
 export default router;

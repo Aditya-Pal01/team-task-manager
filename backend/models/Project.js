@@ -1,10 +1,15 @@
 import mongoose from "mongoose";
 
 const projectSchema = new mongoose.Schema({
-  name: { type: String, required: true },   // ✅ FIX: use `name`
-  description: String,
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
-}, { timestamps: true });
+  title: {
+    type: String,
+    required: true,
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
 export default mongoose.model("Project", projectSchema);
